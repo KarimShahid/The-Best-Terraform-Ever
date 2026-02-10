@@ -23,6 +23,8 @@ resource "aws_subnet" "private" {
   })
 }
 
+# Create exactly one public route table
+# Not using for_each for Route Table as only one RT in public subnet is needed.
 resource "aws_route_table" "public" {
   count  = length(var.public_subnets) > 0 ? 1 : 0
   vpc_id = aws_vpc.this.id
@@ -60,6 +62,7 @@ resource "aws_nat_gateway" "this" {
   })
 }
 
+# Here for_each does make sense, because One private RT per AZ (best practice for HA NAT)
 resource "aws_route_table" "private" {
   for_each = var.private_subnets
 

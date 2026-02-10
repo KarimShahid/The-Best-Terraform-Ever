@@ -1,3 +1,8 @@
+variable "name" {
+  description = "VPC name prefix"
+  type        = string
+}
+
 variable "azs" {
   description = "List of AZs"
   type        = list(string)
@@ -18,4 +23,10 @@ variable "private_subnets" {
 variable "enable_nat" {
   type    = bool
   default = false
+}
+
+variable "tags" {
+  description = "Common tags"
+  type        = map(string)
+  default     = {}
 }
