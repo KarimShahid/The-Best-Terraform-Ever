@@ -1,3 +1,14 @@
+resource "aws_vpc" "this" {
+  cidr_block = var.vpc_cidr
+  
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+  
+  tags = merge(var.tags, {
+    Name = "${var.name}-vpc"
+  })
+}
+
 resource "aws_subnet" "public" {
   for_each = var.public_subnets
 
@@ -23,6 +34,12 @@ resource "aws_subnet" "private" {
   })
 }
 
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.this.id
+
+  tags = merge(var.tags, { Name = "${var.name}-igw" })
+}
+
 # Create exactly one public route table
 # Not using for_each for Route Table as only one RT in public subnet is needed.
 resource "aws_route_table" "public" {
@@ -31,7 +48,7 @@ resource "aws_route_table" "public" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.this.id
+    gateway_id = aws_internet_gateway.igw.id
   }
 
   tags = merge(var.tags, { Name = "${var.name}-public-rt" })
