@@ -4,7 +4,7 @@ variable "region" {
   default     = "us-east-1"
 }
 
-variable "name" {
+variable "vpc_name" {
   description = "VPC name prefix"
   type        = string
   default     = "my-vpc"
@@ -36,7 +36,7 @@ variable "private_subnets" {
   description = "Map of private subnets per AZ (az = cidr)"
   type        = map(string)
   default = {
-    "us-east-1a" = "10.0.11.0/24"
+    # "us-east-1a" = "10.0.11.0/24"
     # "us-east-1b" = "10.0.12.0/24"
   }
 }

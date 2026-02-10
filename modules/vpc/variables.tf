@@ -1,5 +1,5 @@
-variable "name" {
-  description = "VPC name prefix"
+variable "vpc_name" {
+  description = "VPC name"
   type        = string
 }
 

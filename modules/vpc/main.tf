@@ -1,11 +1,11 @@
 resource "aws_vpc" "this" {
   cidr_block = var.vpc_cidr
-  
+
   enable_dns_support   = true
   enable_dns_hostnames = true
-  
+
   tags = merge(var.tags, {
-    Name = "${var.name}-vpc"
+    Name = "${var.vpc_name}"
   })
 }
 
@@ -18,7 +18,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = merge(var.tags, {
-    Name = "${var.name}-public-${each.key}"
+    Name = "${var.vpc_name}-public-${each.key}"
   })
 }
 
@@ -30,14 +30,14 @@ resource "aws_subnet" "private" {
   availability_zone = each.key
 
   tags = merge(var.tags, {
-    Name = "${var.name}-private-${each.key}"
+    Name = "${var.vpc_name}-private-${each.key}"
   })
 }
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.this.id
 
-  tags = merge(var.tags, { Name = "${var.name}-igw" })
+  tags = merge(var.tags, { Name = "${var.vpc_name}-igw" })
 }
 
 # Create exactly one public route table
@@ -51,7 +51,7 @@ resource "aws_route_table" "public" {
     gateway_id = aws_internet_gateway.igw.id
   }
 
-  tags = merge(var.tags, { Name = "${var.name}-public-rt" })
+  tags = merge(var.tags, { Name = "${var.vpc_name}-public-rt" })
 }
 
 resource "aws_route_table_association" "public" {
@@ -73,25 +73,30 @@ resource "aws_nat_gateway" "this" {
   subnet_id     = aws_subnet.public[each.key].id
 
   tags = merge(var.tags, {
-    Name = "${var.name}-nat-${each.key}"
+    Name = "${var.vpc_name}-nat-${each.key}"
   })
 }
 
 # Here for_each does make sense, because One private RT per AZ (best practice for HA NAT)
+# Private Route Tables (one per AZ with private subnet)
 resource "aws_route_table" "private" {
   for_each = var.private_subnets
 
   vpc_id = aws_vpc.this.id
 
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = try(aws_nat_gateway.this[each.key].id, null)
+  dynamic "route" {
+    for_each = var.enable_nat ? [1] : []
+    content {
+      cidr_block     = "0.0.0.0/0"
+      nat_gateway_id = aws_nat_gateway.this[each.key].id
+    }
   }
 
-  tags = merge(var.tags, {
-    Name = "${var.name}-private-rt-${each.key}"
+  tags = merge(var.tags, { 
+    Name = "${var.vpc_name}-private-rt-${each.key}"
   })
 }
+
 
 resource "aws_route_table_association" "private" {
   for_each       = aws_route_table.private
@@ -109,7 +114,7 @@ resource "aws_route_table_association" "private" {
 #   cidr_block        = each.value.cidr
 #   availability_zone = each.value.az
 
-#   tags = merge(var.tags, { Name = "${var.name}-public-${each.key}" })
+#   tags = merge(var.tags, { Name = "${var.vpc_name}-public-${each.key}" })
 # }
 
 #  Yesari garnu parcha haiii!
