@@ -1,8 +1,8 @@
 terraform {
-backend "s3" {
-bucket = "sk-testing-backnd"
-key = "vpc/terraform.tfstate"
-region = "us-east-1"
-encrypt = true
-}
+  backend "s3" {
+    bucket  = "sk-testing-backnd"
+    key     = "vpc/terraform.tfstate"
+    region  = "us-east-1"
+    encrypt = true
+  }
 }
