@@ -17,6 +17,12 @@ variable "azs" {
   # default     = ["us-east-1a", "us-east-1b"]
 }
 
+variable "vpc_cidr" {
+  description = "VPC CIDR block"
+  type        = string
+  default = "10.0.0.0/16"
+}
+
 variable "public_subnets" {
   description = "Map of public subnets per AZ (az = cidr)"
   type        = map(string)

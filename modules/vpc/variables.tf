@@ -8,6 +8,11 @@ variable "azs" {
   type        = list(string)
 }
 
+variable "vpc_cidr" {
+  description = "VPC CIDR block"
+  type        = string
+}
+
 variable "public_subnets" {
   description = "Public subnets as {az = cidr} map (omit for no public subnets)"
   type        = map(string)
