@@ -30,7 +30,7 @@ variable "enable_nat" {
   default = false
 }
 
-variable "tags" {
+variable "default_tags" {
   description = "Common tags"
   type        = map(string)
   default     = {}

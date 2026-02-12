@@ -6,3 +6,5 @@ terraform {
     encrypt = true
   }
 }
+
+# Key will be passed via workflow

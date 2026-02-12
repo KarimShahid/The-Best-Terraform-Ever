@@ -4,7 +4,7 @@ resource "aws_vpc" "this" {
   enable_dns_support   = true
   enable_dns_hostnames = true
 
-  tags = merge(var.tags, {
+  tags = merge(var.default_tags, {
     Name = "${var.vpc_name}"
   })
 }
@@ -17,7 +17,7 @@ resource "aws_subnet" "public" {
   availability_zone       = each.key
   map_public_ip_on_launch = true
 
-  tags = merge(var.tags, {
+  tags = merge(var.default_tags, {
     Name = "${var.vpc_name}-public-${each.key}"
   })
 }
@@ -29,7 +29,7 @@ resource "aws_subnet" "private" {
   cidr_block        = each.value
   availability_zone = each.key
 
-  tags = merge(var.tags, {
+  tags = merge(var.default_tags, {
     Name = "${var.vpc_name}-private-${each.key}"
   })
 }
@@ -37,7 +37,7 @@ resource "aws_subnet" "private" {
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.this.id
 
-  tags = merge(var.tags, { Name = "${var.vpc_name}-igw" })
+  tags = merge(var.default_tags, { Name = "${var.vpc_name}-igw" })
 }
 
 # Create exactly one public route table
@@ -51,7 +51,7 @@ resource "aws_route_table" "public" {
     gateway_id = aws_internet_gateway.igw.id
   }
 
-  tags = merge(var.tags, { Name = "${var.vpc_name}-public-rt" })
+  tags = merge(var.default_tags, { Name = "${var.vpc_name}-public-rt" })
 }
 
 resource "aws_route_table_association" "public" {
@@ -72,7 +72,7 @@ resource "aws_nat_gateway" "this" {
   allocation_id = aws_eip.nat[each.key].id
   subnet_id     = aws_subnet.public[each.key].id
 
-  tags = merge(var.tags, {
+  tags = merge(var.default_tags, {
     Name = "${var.vpc_name}-nat-${each.key}"
   })
 }
@@ -92,7 +92,7 @@ resource "aws_route_table" "private" {
     }
   }
 
-  tags = merge(var.tags, { 
+  tags = merge(var.default_tags, { 
     Name = "${var.vpc_name}-private-rt-${each.key}"
   })
 }

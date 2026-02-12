@@ -47,11 +47,40 @@ variable "enable_nat" {
   default     = false
 }
 
-variable "tags" {
+variable "default_tags" {
   description = "Common tags for all resources"
   type        = map(string)
   default = {
     Environment = "dev"
     Owner       = "karim"
   }
+}
+
+# EC2 name
+variable "ec2_name" {
+  description = "EC2 instance name"
+  type        = string
+  default     = "demo-server"
+}
+
+# FOR SG
+variable "ec2_ports" {
+  description = "EC2 ingress ports"
+  type        = list(number)
+  default     = [8000,6000]
+}
+
+
+#  FOR EC2
+variable "ec2_instances" {
+  description = "Map of EC2 instances to create dynamically. Key is instance name"
+  type = map(object({
+    instance_type      = string
+    subnet_id          = string
+    security_group_ids = list(string)
+    key_name           = string
+    volume_type        = string
+    volume_size        = number
+    tags               = map(string)
+  }))
 }
