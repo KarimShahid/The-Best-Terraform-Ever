@@ -4,7 +4,7 @@ variable "vpc_id" {
 }
 
 variable "sg_map" {
-  description = "Map of SGs to create. Key = SG name, value = object with ports list"
+  description = "Map of SGs to create. Key = instance name, value = object with ports list"
   type = map(object({
     ports = list(number)
   }))

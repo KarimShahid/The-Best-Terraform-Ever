@@ -1,7 +1,7 @@
 resource "aws_security_group" "this" {
   for_each = var.sg_map  # loop over all SGs
 
-  name_prefix = each.key
+  name_prefix = "${each.key}-sg" 
   vpc_id      = var.vpc_id
 
   # Default ports

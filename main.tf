@@ -14,13 +14,8 @@ module "sg" {
   source       = "./modules/sg"
   vpc_id       = module.vpc.vpc_id
   default_tags = var.default_tags
-
-  sg_map = {
-    sonar = { ports = [9000, 6500] }
-    prom  = { ports = [6501, 3000] }
-  }
+  sg_map       = var.sg_map
 }
-
 
 # EC2 module
 module "ec2" {
