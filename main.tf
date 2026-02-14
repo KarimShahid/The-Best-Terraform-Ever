@@ -12,11 +12,14 @@ module "vpc" {
 
 
 module "ec2" {
-  source        = "./modules/ec2"
-  vpc_id        = module.vpc.vpc_id
-  default_tags  = var.default_tags
+  source       = "./modules/ec2"
+  vpc_id       = module.vpc.vpc_id
+  default_tags = var.default_tags
+  name         = var.ec2_name
 
-  name          = var.ec2_name
-  instances     = var.ec2_instances
+  instances = {
+    for k, v in var.ec2_instances :
+    k => merge(v, { subnet_id = module.vpc.public_subnet_ids["us-east-1a"] })
+  }
 }
 
