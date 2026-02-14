@@ -1,6 +1,8 @@
 # Security Group
 resource "aws_security_group" "this" {
-  name_prefix = "${var.name}-sg"
+
+  for_each    = var.instances
+  name_prefix = "${each.key}-sg"
   vpc_id      = var.vpc_id
 
   # SSH
@@ -29,8 +31,19 @@ resource "aws_security_group" "this" {
 
   # Dynamic app ports
   # Only created if var.ports has values
+  # dynamic "ingress" {
+  #   for_each = var.ports
+  #   content {
+  #     from_port   = ingress.value
+  #     to_port     = ingress.value
+  #     protocol    = "tcp"
+  #     cidr_blocks = ["0.0.0.0/0"]
+  #   }
+  # }
+
+  # dynamic ports per instance
   dynamic "ingress" {
-    for_each = var.ports
+    for_each = each.value.ports
     content {
       from_port   = ingress.value
       to_port     = ingress.value
@@ -79,7 +92,8 @@ resource "aws_instance" "this" {
   instance_type           = each.value.instance_type
   key_name                = each.value.key_name
   subnet_id               = each.value.subnet_id
-  vpc_security_group_ids  = each.value.security_group_ids
+  # vpc_security_group_ids  = [aws_security_group.this.id]
+  vpc_security_group_ids  = [aws_security_group.this[each.key].id]
   tags = merge(
     each.value.tags,      # custom tags per instance
     { Name = each.key }   # Name tag = key in the map

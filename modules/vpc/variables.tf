@@ -3,10 +3,10 @@ variable "vpc_name" {
   type        = string
 }
 
-variable "azs" {
-  description = "List of AZs"
-  type        = list(string)
-}
+# variable "azs" {
+#   description = "List of AZs"
+#   type        = list(string)
+# }
 
 variable "vpc_cidr" {
   description = "VPC CIDR block"

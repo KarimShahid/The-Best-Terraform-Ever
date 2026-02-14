@@ -10,12 +10,12 @@ variable "vpc_name" {
   default     = "my-vpc"
 }
 
-variable "azs" {
-  description = "List of availability zones"
-  type        = list(string)
-  default     = ["us-east-1a"]
-  # default     = ["us-east-1a", "us-east-1b"]
-}
+# variable "azs" {
+#   description = "List of availability zones"
+#   type        = list(string)
+#   default     = ["us-east-1a"]
+#   # default     = ["us-east-1a", "us-east-1b"]
+# }
 
 variable "vpc_cidr" {
   description = "VPC CIDR block"
@@ -63,24 +63,16 @@ variable "ec2_name" {
   default     = "demo-server"
 }
 
-# FOR SG
-variable "ec2_ports" {
-  description = "EC2 ingress ports"
-  type        = list(number)
-  default     = [8000,6000]
-}
 
-
-#  FOR EC2
 variable "ec2_instances" {
   description = "Map of EC2 instances to create dynamically. Key is instance name"
   type = map(object({
     instance_type      = string
     subnet_id          = string
-    security_group_ids = list(string)
     key_name           = string
     volume_type        = string
     volume_size        = number
     tags               = map(string)
+    ports              = list(number)  # NEW: ports per instance
   }))
 }
