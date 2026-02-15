@@ -1,0 +1,102 @@
+name: Terraform Deploy EC2
+
+on:
+  workflow_dispatch:
+    inputs:
+      server_name:
+        description: "Server name (used for backend key & tags)"
+        required: true
+        default: "serverA"
+        type: string
+
+      aws_region:
+        description: "AWS Region"
+        required: true
+        default: "us-east-1"
+        type: string
+
+      ami:
+        description: "AMI ID for EC2"
+        required: true
+        default: "ami-0c02fb55956c7d316"
+        type: string
+
+      instance_type:
+        description: "EC2 instance type"
+        required: true
+        default: "t2.micro"
+        type: string
+
+      subnet_id:
+        description: "Subnet ID for EC2"
+        required: true
+        default: "subnet-123456"
+        type: string
+
+      key_name:
+        description: "EC2 key pair name"
+        required: true
+        default: "awsKeyPair"
+        type: string
+
+      volume_size:
+        description: "Root volume size (GB)"
+        required: true
+        default: 20
+        type: string
+
+jobs:
+  terraform:
+    name: Deploy EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ github.event.inputs.aws_region }}
+
+
+# This is tyhe main important part! yata tf state decalred hucnha!
+      - name: Terraform Init with Dynamic Backend Key
+        run: |
+          terraform init \
+            -backend-config="bucket=my-terraform-bucket" \
+            -backend-config="region=${{ github.event.inputs.aws_region }}" \
+            -backend-config="key=ec2/${{ github.event.inputs.server_name }}/terraform.tfstate"
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        env:
+          TF_VAR_server_name: ${{ github.event.inputs.server_name }}
+          TF_VAR_ami: ${{ github.event.inputs.ami }}
+          TF_VAR_instance_type: ${{ github.event.inputs.instance_type }}
+          TF_VAR_subnet_id: ${{ github.event.inputs.subnet_id }}
+          TF_VAR_key_name: ${{ github.event.inputs.key_name }}
+          TF_VAR_volume_size: ${{ github.event.inputs.volume_size }}
+        run: terraform plan
+
+      - name: Terraform Apply
+        env:
+          TF_VAR_server_name: ${{ github.event.inputs.server_name }}
+          TF_VAR_ami: ${{ github.event.inputs.ami }}
+          TF_VAR_instance_type: ${{ github.event.inputs.instance_type }}
+          TF_VAR_subnet_id: ${{ github.event.inputs.subnet_id }}
+          TF_VAR_key_name: ${{ github.event.inputs.key_name }}
+          TF_VAR_volume_size: ${{ github.event.inputs.volume_size }}
+        run: terraform apply -auto-approve
